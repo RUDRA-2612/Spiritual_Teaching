@@ -6,6 +6,9 @@ class AppState {
     this.isLoggedIn = true; // true = inside portal, false = portal select screen
     this.currentRole = 'student'; // 'student' | 'parent'
     this.selectedReligionId = null; // null = home, string = realm hub
+    this.showCourseCatalog = false;
+    this.courseInsightReligionId = null;
+    this.courseInsightLectureId = null;
     this.activeHubTab = 'lectures'; // 'lectures' | 'stories' | 'teachings' | 'calm' | 'exam'
     this.activeChild = 'rudra'; // 'rudra' | 'ananya'
     this.soundEnabled = true;
@@ -35,6 +38,13 @@ class AppState {
       this.progress = this.getDefaultProgress();
     }
 
+    this.resetStarterCourseProgress();
+
+    this.ownedCourseIds = this.loadOwnedCourseIds();
+    this.removeSikhismFromCurrentLibrary();
+    this.sellerCatalog = this.loadSellerCatalog();
+    this.demoOrders = this.loadDemoOrders();
+
     this.audioCtx = null;
     this.subscribers = [];
 
@@ -47,13 +57,120 @@ class AppState {
       stars: 420,
       streak: 5,
       completedLectures: {
-        'h1': true, // Hinduism: 1 / 4
-        'b1': true, // Buddhism: 1 / 4
         's1': true, // Sikhism: 1 / 4
         'i1': true, // Islam: 1 / 4
       },
+      lectureQuizzes: {},
       examScores: {} // Clean so exams are ready to take
     };
+  }
+
+  resetStarterCourseProgress() {
+    if (localStorage.getItem('unisoul_buddhism_hinduism_zero_v1')) return;
+    const starterCourseIds = new Set(['buddhism', 'hinduism']);
+    const lectureIds = RELIGIONS_DATA
+      .filter(religion => starterCourseIds.has(religion.id))
+      .flatMap(religion => religion.lectures.map(lecture => lecture.id));
+    if (!this.progress.completedLectures) this.progress.completedLectures = {};
+    if (!this.progress.lectureQuizzes) this.progress.lectureQuizzes = {};
+    if (!this.progress.dismissedCourseInsights) this.progress.dismissedCourseInsights = {};
+    lectureIds.forEach(id => {
+      delete this.progress.completedLectures[id];
+      delete this.progress.lectureQuizzes[id];
+      delete this.progress.dismissedCourseInsights[id];
+    });
+    delete this.progress.examScores?.buddhism;
+    delete this.progress.examScores?.hinduism;
+    localStorage.setItem('unisoul_progress_v3', JSON.stringify(this.progress));
+    localStorage.setItem('unisoul_buddhism_hinduism_zero_v1', 'true');
+  }
+
+  loadOwnedCourseIds() {
+    const savedCourses = localStorage.getItem('unisoul_owned_courses_v2');
+    if (savedCourses) {
+      try {
+        const ids = JSON.parse(savedCourses);
+        if (Array.isArray(ids)) return ids.filter(id => RELIGIONS_DATA.some(religion => religion.id === id));
+      } catch (e) {}
+    }
+
+    // Start the current learner with the two requested courses. This one-time
+    // ownership migration also trims the previous all-course demo library.
+    const owned = ['buddhism', 'hinduism'];
+    localStorage.setItem('unisoul_owned_courses_v2', JSON.stringify(owned));
+    return owned;
+  }
+
+  ownsCourse(courseId) {
+    return this.ownedCourseIds.includes(courseId);
+  }
+
+  removeSikhismFromCurrentLibrary() {
+    const migrationKey = 'unisoul_remove_sikhism_from_current_user_v1';
+    if (localStorage.getItem(migrationKey)) return;
+    this.ownedCourseIds = this.ownedCourseIds.filter(courseId => courseId !== 'sikhism');
+    localStorage.setItem('unisoul_owned_courses_v2', JSON.stringify(this.ownedCourseIds));
+    localStorage.setItem(migrationKey, 'true');
+  }
+
+  loadSellerCatalog() {
+    try {
+      return JSON.parse(localStorage.getItem('unisoul_seller_catalog_v1') || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  loadDemoOrders() {
+    try {
+      const orders = JSON.parse(localStorage.getItem('unisoul_demo_orders_v1') || '[]');
+      return Array.isArray(orders) ? orders : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  getSellerListing(courseId) {
+    return this.sellerCatalog[courseId] || { price: 499, published: true };
+  }
+
+  updateSellerListing(courseId, listing) {
+    const current = this.getSellerListing(courseId);
+    const price = Math.max(0, Number(listing.price ?? current.price) || 0);
+    this.sellerCatalog[courseId] = { ...current, ...listing, price };
+    localStorage.setItem('unisoul_seller_catalog_v1', JSON.stringify(this.sellerCatalog));
+    this.notify();
+  }
+
+  getCourseSales(courseId) {
+    return this.demoOrders.filter(order => order.courseId === courseId);
+  }
+
+  addOwnedCourse(courseId) {
+    if (!RELIGIONS_DATA.some(religion => religion.id === courseId) || this.ownsCourse(courseId)) return;
+    const listing = this.getSellerListing(courseId);
+    if (!listing.published) return;
+    const order = {
+      id: `DEMO-${Date.now().toString(36).toUpperCase()}`,
+      courseId,
+      amount: listing.price,
+      createdAt: new Date().toISOString()
+    };
+    this.demoOrders = [order, ...this.demoOrders];
+    localStorage.setItem('unisoul_demo_orders_v1', JSON.stringify(this.demoOrders));
+    this.ownedCourseIds = [...this.ownedCourseIds, courseId];
+    localStorage.setItem('unisoul_owned_courses_v2', JSON.stringify(this.ownedCourseIds));
+    this.showCourseCatalog = true;
+    this.notify();
+  }
+
+  openCourseCatalog() {
+    this.selectedReligionId = null;
+    this.showCourseCatalog = true;
+    this.navDrawerOpen = false;
+    this.stopAmbientChant();
+    this.pushState(false);
+    this.notify();
   }
 
   save() {
@@ -76,6 +193,33 @@ class AppState {
   // HISTORY API & ROUTING (TOUCHPAD BACK SUPPORT)
   // ==========================================
   setupHistoryListener() {
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'unisoul_demo_orders_v1' && event.newValue) {
+        try {
+          this.demoOrders = JSON.parse(event.newValue) || [];
+        } catch (e) {
+          this.demoOrders = [];
+        }
+        this.notify();
+      }
+      if (event.key === 'unisoul_owned_courses_v2' && event.newValue) {
+        try {
+          this.ownedCourseIds = JSON.parse(event.newValue) || [];
+        } catch (e) {
+          this.ownedCourseIds = [];
+        }
+        this.notify();
+      }
+      if (event.key === 'unisoul_seller_catalog_v1' && event.newValue) {
+        try {
+          this.sellerCatalog = JSON.parse(event.newValue) || {};
+        } catch (e) {
+          this.sellerCatalog = {};
+        }
+        this.notify();
+      }
+    });
+
     window.addEventListener('popstate', (e) => {
       // Whenever user swipes back on touchpad or clicks browser back
       if (e.state && typeof e.state.isLoggedIn === 'boolean') {
@@ -104,6 +248,7 @@ class AppState {
       isLoggedIn: this.isLoggedIn,
       currentRole: this.currentRole,
       selectedReligionId: this.selectedReligionId,
+      showCourseCatalog: this.showCourseCatalog,
       activeHubTab: this.activeHubTab,
       activeLectureId: this.activeLectureId,
       activeStoryId: this.activeStoryId,
@@ -116,6 +261,8 @@ class AppState {
       hash = '#/portal-select';
     } else if (this.currentRole === 'parent') {
       hash = this.selectedReligionId ? `#/parent/${this.selectedReligionId}` : '#/parent';
+    } else if (this.showCourseCatalog) {
+      hash = '#/courses';
     } else if (this.selectedReligionId) {
       hash = `#/realm/${this.selectedReligionId}`;
     }
@@ -143,6 +290,7 @@ class AppState {
     }
 
     this.selectedReligionId = stateObj.selectedReligionId ?? null;
+    this.showCourseCatalog = stateObj.showCourseCatalog ?? false;
     this.activeHubTab = stateObj.activeHubTab ?? 'lectures';
     this.activeLectureId = stateObj.activeLectureId ?? null;
     this.activeStoryId = stateObj.activeStoryId ?? null;
@@ -183,7 +331,12 @@ class AppState {
   // NAVIGATION ACTIONS
   // ==========================================
   selectReligion(religionId) {
+    if (this.currentRole === 'student' && !this.ownsCourse(religionId)) {
+      this.openCourseCatalog();
+      return;
+    }
     this.lastNavigationTime = Date.now();
+    this.showCourseCatalog = false;
     this.selectedReligionId = religionId;
     this.activeHubTab = 'lectures';
     const religion = RELIGIONS_DATA.find(r => r.id === religionId);
@@ -194,8 +347,11 @@ class AppState {
     this.activeTeachingModal = null;
     this.navDrawerOpen = false;
 
-    // Start authentic long audio
-    this.startAmbientChant(religionId);
+    // A realm change should not carry audio from the previous realm forward.
+    // Chants start only when the learner presses the audio control.
+    if (this.currentChantReligionId && this.currentChantReligionId !== religionId) {
+      this.stopAmbientChant();
+    }
 
     // Push new history state so touchpad back can return to Home
     this.pushState(false);
@@ -204,6 +360,7 @@ class AppState {
 
   clearSelectedReligion() {
     this.selectedReligionId = null;
+    this.showCourseCatalog = false;
     this.activeTeachingModal = null;
     this.navDrawerOpen = false;
     this.stopAmbientChant();
@@ -270,15 +427,49 @@ class AppState {
   // LEARNING ACHIEVEMENTS
   // ==========================================
   markLectureCompleted(lectureId) {
+    if (!this.progress.lectureQuizzes?.[lectureId]) return false;
     if (!this.progress.completedLectures[lectureId]) {
       this.progress.completedLectures[lectureId] = true;
       this.progress.stars += 25;
+      const religion = RELIGIONS_DATA.find(course => course.lectures.some(lecture => lecture.id === lectureId));
+      if (religion) this.maybeTriggerCourseInsight(religion.id, lectureId);
       this.save();
       this.triggerConfetti();
       this.playChime('correct');
       return true;
     }
     return false;
+  }
+
+  dismissCourseInsight() {
+    if (this.courseInsightLectureId) {
+      if (!this.progress.dismissedCourseInsights) this.progress.dismissedCourseInsights = {};
+      this.progress.dismissedCourseInsights[this.courseInsightLectureId] = true;
+      localStorage.setItem('unisoul_progress_v3', JSON.stringify(this.progress));
+    }
+    this.courseInsightReligionId = null;
+    this.courseInsightLectureId = null;
+    this.notify();
+  }
+
+  maybeTriggerCourseInsight(religionId, lectureId = this.activeLectureId) {
+    if (!religionId || !lectureId || this.progress.dismissedCourseInsights?.[lectureId]) return false;
+    const religion = RELIGIONS_DATA.find(course => course.id === religionId);
+    if (religion?.lectures.some(lecture => lecture.id === lectureId) && this.progress.completedLectures[lectureId]) {
+      this.courseInsightReligionId = religionId;
+      this.courseInsightLectureId = lectureId;
+      return true;
+    }
+    return false;
+  }
+
+  markLectureQuizPassed(lectureId) {
+    if (!this.progress.lectureQuizzes) this.progress.lectureQuizzes = {};
+    if (this.progress.lectureQuizzes[lectureId]) return;
+    this.progress.lectureQuizzes[lectureId] = true;
+    this.save();
+    this.triggerConfetti();
+    this.playChime('correct');
   }
 
   saveExamScore(religionId, score, grade) {

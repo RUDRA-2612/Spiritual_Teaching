@@ -17,7 +17,7 @@ export function renderStudentHub(religionId, activeTab = 'lectures') {
       <div class="hub-header-bar">
         <button class="back-btn" id="btn-back-to-realms">
           <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
-          <span>Back to All Realms</span>
+          <span>Back to My Courses</span>
         </button>
 
         <div class="chant-player-container">
@@ -58,11 +58,7 @@ export function renderStudentHub(religionId, activeTab = 'lectures') {
             <span class="hub-hero-symbol">${renderReligionSymbol(religion, 36)}</span>
             <span>${religion.name}</span>
           </h2>
-          <p class="hub-hero-sub">${religion.subname}</p>
           <p>${religion.summary}</p>
-          <div class="hub-sound-info-tag">
-            🎵 Sacred Audio: ${chant.name} • ${chant.description}
-          </div>
         </div>
 
         <div class="hub-hero-stat">
@@ -87,7 +83,7 @@ export function renderStudentHub(religionId, activeTab = 'lectures') {
           <span>🧘 Mindful Calm</span>
         </button>
         <button class="hub-tab-btn ${activeTab === 'exam' ? 'active' : ''}" data-hub-tab="exam">
-          <span>📝 Exam & Quiz</span>
+          <span>📝 Exam</span>
         </button>
       </div>
 
@@ -121,6 +117,20 @@ function renderLecturesTab(religion) {
   // Select active lecture from state, or default to first lecture
   const currentLecture = religion.lectures.find(l => l.id === appState.activeLectureId) || religion.lectures[0];
   const isCompleted = appState.progress.completedLectures[currentLecture.id];
+  const quizPassed = Boolean(appState.progress.lectureQuizzes?.[currentLecture.id]);
+  const quizQuestions = [
+    { prompt: 'What is the central lesson of this lecture?', correct: currentLecture.takeaway },
+    { prompt: 'Which idea best describes this lesson?', correct: currentLecture.takeaway },
+    { prompt: 'What should a learner remember from this story or teaching?', correct: currentLecture.takeaway },
+    { prompt: 'Which choice follows the lesson taught here?', correct: currentLecture.takeaway },
+    { prompt: 'What value does this lecture encourage?', correct: currentLecture.takeaway }
+  ];
+  const quizDistractors = [
+    'Winning matters more than treating others fairly.',
+    'Ignore the needs of others when making choices.',
+    'Act quickly without thinking about the results.',
+    'Keep kindness only for people who can reward you.'
+  ];
 
   const playlistHtml = religion.lectures.map((lec, idx) => {
     const isDone = appState.progress.completedLectures[lec.id];
@@ -183,9 +193,9 @@ function renderLecturesTab(religion) {
                 <p class="video-desc">${currentLecture.description}</p>
               </div>
               
-              <button class="complete-lecture-btn ${isCompleted ? 'completed' : ''}" id="btn-complete-lecture" data-lecture-id="${currentLecture.id}">
+              <button class="complete-lecture-btn ${isCompleted ? 'completed' : ''}" id="btn-complete-lecture" data-lecture-id="${currentLecture.id}" ${!quizPassed || isCompleted ? 'disabled' : ''}>
                 <i data-lucide="${isCompleted ? 'check-circle-2' : 'award'}" style="width: 18px; height: 18px;"></i>
-                <span>${isCompleted ? '✓ Completed (+25 Stars Earned)' : 'Mark as Completed (+25 Stars)'}</span>
+                <span>${isCompleted ? '✓ Completed (+25 Stars Earned)' : quizPassed ? 'Mark as Completed (+25 Stars)' : 'Complete the quiz to unlock'}</span>
               </button>
             </div>
 
@@ -193,6 +203,21 @@ function renderLecturesTab(religion) {
             <div class="video-takeaway-banner">
               <strong>💡 Key Moral Takeaway:</strong> ${currentLecture.takeaway}
             </div>
+            <section class="lecture-quiz" aria-labelledby="lecture-quiz-title">
+              <h3 id="lecture-quiz-title">Quick quiz: ${currentLecture.title}</h3>
+              <p>Answer all five questions. Get at least four right to unlock lecture completion.</p>
+              <div class="question-card" data-lecture-quiz="${currentLecture.id}">
+                ${quizQuestions.map((question, qIdx) => {
+                  const options = [question.correct, ...quizDistractors.slice(0, 3)];
+                  const offset = qIdx % options.length;
+                  const shuffled = options.map((_, index) => options[(index + offset) % options.length]);
+                  const correctIndex = shuffled.indexOf(question.correct);
+                  return `<div class="lecture-quiz-question" data-lecture-q="${qIdx}"><div class="q-number">Question ${qIdx + 1} of 5</div><div class="q-text">${question.prompt}</div><div class="options-grid">${shuffled.map((option, index) => `<button type="button" class="opt-btn" data-lecture-opt="${index}" data-correct="${index === correctIndex}" ${quizPassed ? 'disabled' : ''}><span class="opt-letter">${String.fromCharCode(65 + index)}</span><span class="opt-label">${option}</span></button>`).join('')}</div></div>`;
+                }).join('')}
+                <button type="button" class="submit-exam-btn lecture-quiz-submit" data-submit-lecture-quiz="${currentLecture.id}" ${quizPassed ? 'disabled' : ''}>${quizPassed ? '✓ Quiz completed' : 'Check answer'}</button>
+                <p class="lecture-quiz-feedback" aria-live="polite">${quizPassed ? 'You passed this lecture quiz.' : ''}</p>
+              </div>
+            </section>
           </div>
         </div>
 
@@ -245,7 +270,6 @@ function renderStoriesTab(religion) {
       <div class="storybook-container">
         <div class="story-art-frame">
           <img src="${currentStory.art}" alt="${currentStory.title}" />
-          <div class="story-art-tag">${currentStory.subtitle}</div>
         </div>
 
         <div class="story-content">
@@ -261,8 +285,7 @@ function renderStoriesTab(religion) {
           </div>
 
           <h3 class="story-main-title">${currentStory.title}</h3>
-          <div class="story-subtitle-tag">${currentStory.subtitle}</div>
-          
+          ${currentStory.sourceNote ? `<p class="story-source-note">Story source: ${currentStory.sourceNote}</p>` : ''}
           <div class="story-body-text" id="story-paragraphs">
             ${currentStory.text.split('\n\n').map(p => `<p>${p}</p>`).join('')}
           </div>
@@ -367,7 +390,7 @@ function renderExamTab(religion, examResult) {
         <span class="passed-trophy">🏆</span>
         <div>
           <strong>Official Honor Earned: Score ${examResult.score}% (Grade ${examResult.grade})</strong>
-          <p>You have demonstrated thoughtful understanding of ${religion.name}. You can retake the quiz anytime to practice!</p>
+          <p>You have demonstrated thoughtful understanding of ${religion.name}. You can retake the exam anytime to practice!</p>
         </div>
       </div>
       <button class="view-cert-pill-btn" id="btn-view-certificate" data-religion-id="${religion.id}">
@@ -402,7 +425,7 @@ function renderExamTab(religion, examResult) {
         <div class="exam-header">
           <div>
             <h3 style="font-size: 22px; font-weight: 800; color: #0f172a;">Certification Exam: ${religion.name}</h3>
-            <p style="font-size: 13.5px; color: #64748b;">Answer all 5 questions to receive your official Certificate of Wisdom.</p>
+            <p style="font-size: 13.5px; color: #64748b;">Final course exam: answer 15 questions. Score at least 80% to receive your Certificate of Wisdom.</p>
           </div>
           <div class="pass-mark-chip">
             Passing Grade: 80%

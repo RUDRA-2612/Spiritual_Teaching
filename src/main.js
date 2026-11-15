@@ -6,6 +6,8 @@ import { renderTeachingModal } from './components/TeachingModal.js';
 import { renderFooter } from './components/Footer.js';
 import { renderStudentHome } from './components/StudentHome.js';
 import { renderStudentHub } from './components/StudentHub.js';
+import { renderCourseCatalog } from './components/CourseCatalog.js';
+import { renderCrossFaithInsightModal } from './components/CrossFaithInsightModal.js';
 import { renderParentHome } from './components/ParentHome.js';
 import { renderParentHub } from './components/ParentHub.js';
 import { openCertificateModal } from './components/CertificateModal.js';
@@ -42,9 +44,9 @@ function renderApp() {
     <nav class="navbar">
       <div class="nav-left-group">
         <!-- Top Left Menu Hamburger (Faith Navigator Drawer) -->
-        <button class="nav-drawer-toggle-btn" id="btn-open-nav-drawer" title="Open Faith & Progress Navigator">
+        <button class="nav-drawer-toggle-btn" id="btn-open-nav-drawer" title="Open My Courses and course catalog">
           <i data-lucide="menu" style="width: 20px; height: 20px;"></i>
-          <span>Faith Navigator</span>
+          <span>My Courses</span>
         </button>
 
         <!-- Brand Home Link -->
@@ -65,10 +67,10 @@ function renderApp() {
 
         <!-- Profile Badge -->
         <div class="profile-badge-pill" id="btn-profile-badge">
-          <div class="profile-avatar">${appState.currentRole === 'parent' ? '🛡️' : '🎒'}</div>
+          <div class="profile-avatar">${appState.currentRole === 'parent' ? '🛍️' : '🎒'}</div>
           <div class="profile-text">
-            <span class="user-name">${appState.currentRole === 'parent' ? 'Parent & Educator' : 'Rudra'}</span>
-            <span class="user-role">${appState.currentRole === 'parent' ? 'Admin Portal' : 'Young Scholar • ⭐ ' + appState.progress.stars}</span>
+            <span class="user-name">${appState.currentRole === 'parent' ? 'Course Seller' : 'Rudra'}</span>
+            <span class="user-role">${appState.currentRole === 'parent' ? 'Seller Portal' : 'Young Scholar • ⭐ ' + appState.progress.stars}</span>
           </div>
         </div>
 
@@ -84,13 +86,14 @@ function renderApp() {
   // MAIN BODY ROUTING
   let mainBodyHtml = '';
   if (appState.currentRole === 'student') {
+    if (appState.selectedReligionId) appState.maybeTriggerCourseInsight(appState.selectedReligionId, appState.activeLectureId);
     if (appState.selectedReligionId === null) {
-      mainBodyHtml = renderStudentHome();
+      mainBodyHtml = appState.showCourseCatalog ? renderCourseCatalog() : renderStudentHome();
     } else {
       mainBodyHtml = renderStudentHub(appState.selectedReligionId, appState.activeHubTab);
     }
   } else {
-    // Parent Portal
+    // Course Seller Portal
     if (appState.selectedReligionId === null) {
       mainBodyHtml = renderParentHome();
     } else {
@@ -104,8 +107,9 @@ function renderApp() {
   // Slide-out Drawer & Modals
   const drawerHtml = renderNavDrawer();
   const teachingModalHtml = renderTeachingModal();
+  const crossFaithInsightHtml = renderCrossFaithInsightModal();
 
-  app.innerHTML = particlesHtml + navHtml + mainBodyHtml + footerHtml + drawerHtml + teachingModalHtml;
+  app.innerHTML = particlesHtml + navHtml + mainBodyHtml + footerHtml + drawerHtml + teachingModalHtml + crossFaithInsightHtml;
 
   // Initialize Lucide icons
   if (window.lucide) {
@@ -143,6 +147,12 @@ function attachMainListeners() {
   document.getElementById('btn-close-drawer')?.addEventListener('click', () => {
     appState.toggleNavDrawer(false);
   });
+
+  document.getElementById('btn-close-cross-faith-insight')?.addEventListener('click', () => appState.dismissCourseInsight());
+  document.getElementById('btn-done-cross-faith-insight')?.addEventListener('click', () => appState.dismissCourseInsight());
+  document.getElementById('cross-faith-insight-overlay')?.addEventListener('click', (event) => {
+    if (event.target.id === 'cross-faith-insight-overlay') appState.dismissCourseInsight();
+  });
   document.getElementById('drawer-backdrop')?.addEventListener('click', (e) => {
     if (e.target.id === 'drawer-backdrop') {
       appState.toggleNavDrawer(false);
@@ -160,6 +170,23 @@ function attachMainListeners() {
   document.getElementById('btn-drawer-home')?.addEventListener('click', () => {
     appState.clearSelectedReligion();
   });
+
+  document.getElementById('btn-find-more-courses')?.addEventListener('click', () => {
+    appState.openCourseCatalog();
+  });
+  document.querySelector('[data-open-course-catalog]')?.addEventListener('click', () => {
+    appState.openCourseCatalog();
+  });
+  document.getElementById('btn-my-courses')?.addEventListener('click', () => {
+    appState.clearSelectedReligion();
+  });
+  document.querySelectorAll('[data-buy-course]').forEach(button => button.addEventListener('click', () => {
+    const course = RELIGIONS_DATA.find(item => item.id === button.getAttribute('data-buy-course'));
+    if (!course) return;
+    const listing = appState.getSellerListing(course.id);
+    const confirmed = window.confirm(`Demo purchase for ${course.name} at ₹${Number(listing.price).toLocaleString('en-IN')}: add this course to My Courses? No payment will be processed.`);
+    if (confirmed) appState.addOwnedCourse(course.id);
+  }));
 
   document.getElementById('btn-drawer-logout')?.addEventListener('click', () => {
     appState.logout();
@@ -229,6 +256,15 @@ function attachMainListeners() {
     appState.setActiveChild(e.target.value);
   });
 
+  document.querySelectorAll('[data-save-seller-listing]').forEach(form => form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const courseId = form.getAttribute('data-save-seller-listing');
+    const price = form.querySelector('[name="course-price"]')?.value;
+    const published = Boolean(form.querySelector('[name="course-published"]')?.checked);
+    appState.updateSellerListing(courseId, { price, published });
+    alert('Course listing saved.');
+  }));
+
   // Hub Tabs
   document.querySelectorAll('[data-hub-tab]').forEach(tabBtn => {
     tabBtn.addEventListener('click', () => {
@@ -254,6 +290,11 @@ function attachMainListeners() {
   if (completeBtn) {
     completeBtn.addEventListener('click', () => {
       const lecId = completeBtn.getAttribute('data-lecture-id');
+      if (!appState.progress.lectureQuizzes?.[lecId]) {
+        const feedback = document.querySelector(`[data-lecture-quiz="${lecId}"] .lecture-quiz-feedback`);
+        if (feedback) feedback.textContent = 'Answer the lecture quiz first to unlock completion.';
+        return;
+      }
       const earned = appState.markLectureCompleted(lecId);
       if (earned) {
         completeBtn.classList.add('completed');
@@ -265,6 +306,25 @@ function attachMainListeners() {
       }
     });
   }
+
+  document.querySelectorAll('[data-lecture-quiz]').forEach(card => {
+    card.querySelectorAll('.lecture-quiz-question').forEach(question => question.querySelectorAll('[data-lecture-opt]').forEach(button => button.addEventListener('click', () => {
+      question.querySelectorAll('[data-lecture-opt]').forEach(option => option.classList.remove('selected'));
+      button.classList.add('selected');
+    })));
+    card.querySelector('[data-submit-lecture-quiz]')?.addEventListener('click', () => {
+      const feedback = card.querySelector('.lecture-quiz-feedback');
+      const questions = [...card.querySelectorAll('.lecture-quiz-question')];
+      const answered = questions.filter(question => question.querySelector('[data-lecture-opt].selected'));
+      if (answered.length !== questions.length) { feedback.textContent = `Answer all five questions first (${answered.length}/5 answered).`; return; }
+      const correct = answered.filter(question => question.querySelector('[data-lecture-opt].selected')?.getAttribute('data-correct') === 'true').length;
+      if (correct < 4) {
+        feedback.textContent = `You got ${correct} of 5 correct. Review the lesson and try again; at least 4 correct answers unlock completion.`;
+        return;
+      }
+      appState.markLectureQuizPassed(card.getAttribute('data-lecture-quiz'));
+    });
+  });
 
   // Interactive Video Play / Pause Toggle
   const videoPlayBtn = document.getElementById('btn-video-play-toggle');
@@ -293,8 +353,7 @@ function attachMainListeners() {
         if (pct >= 100) {
           clearInterval(videoPlaybackTimer);
           videoPlaybackTimer = null;
-          const curLec = appState.activeLectureId;
-          if (curLec) appState.markLectureCompleted(curLec);
+          // Video playback ending does not mark a lecture complete; pass the quiz first.
         }
       }, 1000);
     }
@@ -401,7 +460,7 @@ function attachMainListeners() {
   // ==========================================
   document.querySelectorAll('.opt-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const qCard = btn.closest('.question-card');
+      const qCard = btn.closest('.lecture-quiz-question, .question-card');
       qCard.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       appState.playChime('harp');
@@ -431,8 +490,11 @@ function attachMainListeners() {
         }
       });
 
-      // Calculate score (guarantee at least passing for earnest attempt)
-      const calculatedScore = Math.max(Math.round((correctCount / totalQuestions) * 100), 80);
+      if (correctCount < Math.ceil(totalQuestions * 0.8)) {
+        alert(`You got ${correctCount} of ${totalQuestions} correct. Review your answers and try again; 80% is required to pass the final exam.`);
+        return;
+      }
+      const calculatedScore = Math.round((correctCount / totalQuestions) * 100);
       const grade = calculatedScore >= 95 ? 'A+' : calculatedScore >= 85 ? 'A' : 'B+';
 
       appState.saveExamScore(religionId, calculatedScore, grade);

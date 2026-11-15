@@ -437,9 +437,81 @@ body {
 /* Religions Grid */
 .religions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
   gap: 24px;
 }
+
+.course-catalog-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 26px;
+}
+.course-catalog-heading h2 { margin: 3px 0 5px; color: #0f172a; font-size: 30px; font-weight: 850; }
+.course-catalog-heading p { color: #64748b; font-size: 14px; }
+.catalog-eyebrow { color: #6366f1; font-size: 11px; font-weight: 850; letter-spacing: 1.2px; }
+.catalog-course-meta { display: grid; gap: 8px; margin: 14px 0 18px; color: #475569; font-size: 13px; }
+.catalog-buy-btn { margin-top: auto; }
+.catalog-demo-note { margin-top: 10px; color: #64748b; font-size: 11px; line-height: 1.5; }
+.catalog-empty-state { grid-column: 1 / -1; padding: 44px 24px; text-align: center; border: 1px dashed #cbd5e1; border-radius: 16px; background: #f8fafc; }
+.catalog-empty-state > span { font-size: 32px; }
+.catalog-empty-state h3 { margin: 10px 0 6px; color: #0f172a; }
+.catalog-empty-state p { color: #64748b; font-size: 14px; }
+.find-courses-inline { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 24px auto 0; padding: 12px 20px; border: 1px solid #c7d2fe; border-radius: 999px; color: #4338ca; background: #eef2ff; font-weight: 800; cursor: pointer; }
+.find-courses-inline:hover { background: #e0e7ff; }
+.drawer-empty-courses { padding: 16px 10px; color: #64748b; font-size: 13px; text-align: center; }
+
+.seller-dashboard, .seller-course-detail { max-width: 1240px; }
+.seller-welcome { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:24px; }
+.seller-welcome h2 { margin:4px 0; color:#0f172a; font-size:30px; font-weight:850; }
+.seller-welcome p { color:#64748b; font-size:14px; }
+.seller-eyebrow { color:#4f46e5; font-size:10px; font-weight:850; letter-spacing:1.1px; }
+.seller-sandbox-badge { padding:8px 12px; border:1px solid #fde68a; border-radius:999px; background:#fffbeb; color:#92400e; font-size:11px; font-weight:800; }
+.seller-metrics-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:22px; }
+.seller-metric-card { display:flex; align-items:center; gap:13px; min-height:94px; padding:18px; border:1px solid #e2e8f0; border-radius:14px; background:#fff; box-shadow:var(--shadow-sm); }
+.seller-metric-card > span { display:grid; place-items:center; width:42px; height:42px; border-radius:12px; background:#eef2ff; font-size:21px; }
+.seller-metric-card strong,.seller-metric-card small { display:block; }
+.seller-metric-card strong { color:#0f172a; font-size:22px; font-weight:850; }
+.seller-metric-card small { margin-top:3px; color:#64748b; font-size:11px; }
+.seller-panel { margin:20px 0; padding:22px; border:1px solid #e2e8f0; border-radius:16px; background:#fff; box-shadow:var(--shadow-sm); }
+.seller-panel-heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.seller-panel-heading h3 { color:#0f172a; font-size:18px; font-weight:850; }
+.seller-panel-heading p { margin-top:4px; color:#64748b; font-size:12px; }
+.seller-table-wrap { overflow-x:auto; }
+.seller-table { width:100%; border-collapse:collapse; text-align:left; }
+.seller-table th { padding:11px 12px; border-bottom:1px solid #e2e8f0; color:#64748b; font-size:10px; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+.seller-table td { padding:13px 12px; border-bottom:1px solid #f1f5f9; color:#334155; font-size:12px; white-space:nowrap; }
+.seller-table td:first-child { white-space:normal; min-width:190px; }
+.seller-table td small { display:block; margin-top:4px; color:#64748b; font-size:10px; }
+.seller-status { display:inline-flex; padding:5px 9px; border-radius:999px; font-size:10px; font-weight:800; }
+.seller-status.published { background:#dcfce7; color:#166534; }
+.seller-status.draft { background:#f1f5f9; color:#475569; }
+.seller-status.demo { background:#fef3c7; color:#92400e; }
+.seller-manage-btn { padding:7px 10px; border:1px solid #c7d2fe; border-radius:8px; background:#eef2ff; color:#4338ca; font-size:11px; font-weight:800; cursor:pointer; }
+.seller-no-orders { padding:30px 15px; text-align:center; color:#64748b; }
+.seller-no-orders span { display:block; margin-bottom:7px; font-size:28px; }
+.seller-no-orders strong { color:#334155; }
+.seller-no-orders p,.seller-data-notice { margin-top:8px; color:#64748b; font-size:11px; line-height:1.5; }
+.seller-data-notice { padding:12px 14px; border-radius:10px; background:#f8fafc; }
+.seller-course-hero { display:flex; align-items:center; gap:16px; margin:10px 0 22px; padding:22px; border-radius:16px; color:#fff; background:linear-gradient(110deg,var(--seller-course-color),#0f172a); }
+.seller-course-symbol { display:grid; place-items:center; width:58px; height:58px; flex:0 0 58px; border-radius:16px; background:rgba(255,255,255,.2); }
+.seller-course-hero > div:nth-child(2) { flex:1; }
+.seller-course-hero .seller-eyebrow { color:#e0e7ff; }
+.seller-course-hero h2 { margin:3px 0 5px; font-size:24px; }
+.seller-course-hero p { max-width:700px; color:#e2e8f0; font-size:12px; line-height:1.5; }
+.seller-course-hero .seller-status { background:#fff; }
+.course-metrics-grid { margin-top:0; }
+.seller-listing-form { display:flex; align-items:end; gap:22px; flex-wrap:wrap; }
+.seller-listing-form > label:first-child { display:grid; gap:7px; color:#334155; font-size:12px; font-weight:800; }
+.seller-listing-form input[type="number"] { width:180px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:9px; font:inherit; }
+.seller-listing-form label small { color:#64748b; font-size:10px; font-weight:500; }
+.seller-publish-toggle { display:flex; align-items:flex-start; gap:9px; color:#334155; font-size:12px; }
+.seller-publish-toggle input { margin-top:3px; }
+.seller-publish-toggle strong,.seller-publish-toggle small { display:block; }
+.seller-content-summary { margin-top:13px; color:#64748b; font-size:11px; }
+@media(max-width:760px) { .seller-metrics-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .seller-welcome { align-items:flex-start; flex-direction:column; } .seller-course-hero { align-items:flex-start; flex-wrap:wrap; } }
+@media(max-width:440px) { .seller-metrics-grid { grid-template-columns:1fr; } .seller-listing-form { align-items:stretch; flex-direction:column; } }
 
 /* =================================================================
    RELIGION CARD WITH LIGHT ARTWORK BACKGROUND & GLOW EFFECTS
@@ -1344,6 +1416,78 @@ body {
   box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
 }
 
+.storybook-container {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.85fr) minmax(0, 1.4fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.story-art-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-content {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.audio-narrator-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  border: 1px solid #e0e7ff;
+  border-radius: 12px;
+  background: #f8faff;
+}
+
+.audio-play-btn {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #ffffff;
+  background: var(--primary);
+  cursor: pointer;
+}
+
+.story-body-text {
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.story-body-text p + p { margin-top: 14px; }
+.story-source-note {
+  margin: 0 0 14px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.moral-takeaway-banner {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  color: #78350f;
+  background: #fffbeb;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
 .pill-icon { font-size: 16px; }
 
 .pill-texts {
@@ -1673,6 +1817,95 @@ body {
 }
 
 /* Parent Portal Styles */
+.parent-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0 30px;
+}
+
+.kpi-card, .parent-card-box, .cert-status-card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.kpi-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  font-size: 23px;
+}
+
+.kpi-value { color: #0f172a; font: 800 20px/1.2 var(--font-display); }
+.kpi-label { margin-top: 4px; color: #64748b; font-size: 11.5px; line-height: 1.4; }
+
+.parent-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.85fr);
+  align-items: start;
+  gap: 22px;
+}
+
+.parent-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.parent-box-header h3 { color: #0f172a; font: 800 17px/1.35 var(--font-display); }
+
+.chart-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 190px;
+  padding: 24px 8px 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.chart-container .chart-bar-group { height: 100%; justify-content: flex-end; }
+.chart-container .chart-bar { max-width: 38px; width: min(38px, 65%); min-height: 8px; }
+
+.dinner-prompt-card {
+  margin-bottom: 18px;
+  padding: 22px;
+  border: 1px solid #e9d5ff;
+  border-radius: var(--radius-md);
+  background: linear-gradient(145deg, #faf5ff, #ffffff);
+  box-shadow: var(--shadow-sm);
+}
+
+.dinner-badge {
+  display: inline-flex;
+  margin-bottom: 14px;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  color: #6b21a8;
+  background: #f3e8ff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.dinner-prompt-card h4 { margin-bottom: 8px; color: #334155; font-size: 13px; }
+.dinner-quote { color: #1e1b4b; font: 600 17px/1.5 var(--font-serif); }
+.dinner-tip { margin-top: 16px; color: #475569; font-size: 12px; line-height: 1.55; }
+
 .parent-overview-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1856,6 +2089,47 @@ body {
   text-align: center;
   position: relative;
   box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+}
+
+.cross-faith-insight-card {
+  position: relative;
+  width: min(100%, 650px);
+  max-height: min(90vh, 820px);
+  overflow-y: auto;
+  padding: 32px;
+  border: 1px solid #e0e7ff;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.28);
+  text-align: center;
+}
+.cross-faith-insight-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 25px;
+  cursor: pointer;
+}
+.cross-faith-insight-icon { font-size: 34px; }
+.cross-faith-insight-kicker { margin-top: 8px; color: #4f46e5; font-size: 10px; font-weight: 850; letter-spacing: 1.1px; }
+.cross-faith-insight-card h2 { margin: 7px 0 10px; color: #0f172a; font-size: 28px; }
+.cross-faith-insight-lecture { color: #64748b; font-size: 12px; font-weight: 750; }
+.cross-faith-insight-theme { margin: 14px 0 8px; color: #4338ca; font-size: 17px; }
+.cross-faith-insight-lead { max-width: 540px; margin: 0 auto 20px; color: #475569; font-size: 14px; line-height: 1.65; }
+.cross-faith-teaching-list { display: grid; gap: 8px; text-align: left; }
+.cross-faith-teaching-row { display: grid; grid-template-columns: 145px 1fr; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #f8fafc; color: #475569; font-size: 12.5px; line-height: 1.45; }
+.cross-faith-teaching-row strong { color: #1e293b; }
+.cross-faith-insight-note { margin: 16px 0; color: #64748b; font-size: 11px; line-height: 1.5; }
+.cross-faith-insight-done { justify-content: center; }
+@media (max-width: 520px) {
+  .cross-faith-insight-card { padding: 28px 18px 20px; }
+  .cross-faith-teaching-row { grid-template-columns: 1fr; gap: 2px; }
 }
 
 .cert-title {
@@ -2714,13 +2988,76 @@ body {
 }
 
 @media (max-width: 768px) {
-  .navbar { padding: 10px 16px; }
+  .navbar { padding: 10px 16px; align-items: flex-start; gap: 12px; }
+  .nav-left-group, .nav-controls { gap: 8px; }
+  .nav-drawer-toggle-btn { padding: 8px 10px; }
+  .nav-drawer-toggle-btn span { display: none; }
+  .brand-text span { display: none; }
+  .brand-text h1 { font-size: 18px; }
+  .brand-icon { width: 38px; height: 38px; font-size: 20px; }
+  .profile-badge-pill { padding: 4px; }
+  .profile-text { display: none; }
+  .logout-btn { padding: 8px 10px; }
+  .logout-btn span { display: none; }
   .main-content { padding: 16px 16px 60px 16px; }
   .hero-banner { padding: 24px 20px; }
   .hero-title { font-size: 24px; }
+  .hero-badge { font-size: 10px; }
+  .section-header { align-items: flex-start; }
+  .section-header h2 { font-size: 22px; }
+  .hub-hero { padding: 24px 20px; gap: 18px; align-items: flex-start; }
+  .hub-hero-info h2 { font-size: 26px; }
+  .hub-nav-tabs { overflow-x: auto; }
+  .hub-tab-btn { flex: 0 0 auto; }
+  .chant-player-container { flex-wrap: wrap; justify-content: flex-end; }
+  .video-details-header { flex-direction: column; }
+  .parent-grid { grid-template-columns: 1fr; }
+  .parent-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .video-layout { grid-template-columns: 1fr; }
   .storybook-container { grid-template-columns: 1fr; }
   .portal-cards-grid { grid-template-columns: 1fr; }
   .footer-container { grid-template-columns: 1fr; }
   .stats-pills { display: none; }
 }
+
+@media (max-width: 480px) {
+  .navbar { padding: 8px 10px; }
+  .nav-left-group { gap: 6px; }
+  .nav-controls { gap: 6px; }
+  .nav-drawer-toggle-btn { padding: 7px; }
+  .sound-toggle-btn { width: 34px; height: 34px; }
+  .profile-avatar { width: 28px; height: 28px; }
+  .main-content { padding: 14px 12px 48px; }
+  .hero-banner { padding: 22px 16px; }
+  .daily-quote-box { padding: 14px; }
+  .religions-grid { grid-template-columns: minmax(0, 1fr); }
+  .hub-header-bar { align-items: stretch; }
+  .chant-player-container { justify-content: space-between; width: 100%; }
+  .chant-player-btn { padding: 8px 12px; }
+  .hub-hero { flex-direction: column; }
+  .hub-hero-info h2 { font-size: 22px; }
+  .hub-hero-stat { align-self: flex-start; padding: 12px 18px; }
+  .parent-kpi-grid { grid-template-columns: 1fr; }
+  .video-controls-bar { gap: 8px; padding: 12px; }
+  .speed-pill { display: none; }
+  .storybook-container { gap: 18px; }
+  .story-main-title { font-size: 24px; }
+  .story-selector-bar { align-items: flex-start; }
+  .portal-gate-wrapper { padding: 24px 12px; }
+  .portal-card { padding: 26px 20px; }
+}
+
+.lecture-quiz {
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: #f8fbff;
+}
+.lecture-quiz h3 { margin: 0 0 6px; color: #0f172a; font-size: 18px; }
+.lecture-quiz > p { margin: 0 0 18px; color: #64748b; font-size: 13px; }
+.lecture-quiz .submit-exam-btn { margin-top: 16px; }
+.lecture-quiz-feedback { min-height: 20px; margin: 12px 0 0; color: #475569; font-size: 13px; font-weight: 700; }
+.lecture-quiz-question + .lecture-quiz-question { margin-top: 24px; }
+.complete-lecture-btn:disabled { cursor: not-allowed; opacity: 0.68; transform: none; }
+.lecture-quiz-submit:disabled { cursor: default; opacity: 0.72; }

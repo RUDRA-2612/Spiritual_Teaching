@@ -5,7 +5,8 @@ import { renderReligionSymbol } from '../utils/symbolHelper.js';
 export function renderStudentHome() {
   const quote = DAILY_QUOTES[0];
 
-  const cardsHtml = RELIGIONS_DATA.map(religion => {
+  const ownedCourses = RELIGIONS_DATA.filter(religion => appState.ownsCourse(religion.id));
+  const cardsHtml = ownedCourses.map(religion => {
     const { percent, completedCount, totalCount } = appState.getReligionProgress(religion.id);
     const symbolHtml = renderReligionSymbol(religion, 26);
 
@@ -59,10 +60,6 @@ export function renderStudentHome() {
             <span>${ACADEMY_INFO.name} • Global Multi-Faith Academy</span>
           </div>
           <h2 class="hero-title">${ACADEMY_INFO.name}</h2>
-          <p class="hero-subtitle">
-            ${ACADEMY_INFO.tagline}. Discover the golden thread of world wisdom through authentic audio chants, animated moral stories, and character certifications.
-          </p>
-
           <div class="daily-quote-box">
             <div class="quote-header">
               <span class="quote-icon">🕊️</span>
@@ -80,16 +77,16 @@ export function renderStudentHome() {
       <div class="section-header">
         <div>
           <h2>
-            <span>Explore World Wisdom Realms</span>
+            <span>My Courses</span>
           </h2>
-          <p>Select any tradition below to listen to authentic chants, watch video lectures, read moral stories, and earn certificates.</p>
         </div>
       </div>
 
       <!-- Religions Cards Grid -->
       <div class="religions-grid">
-        ${cardsHtml}
+        ${cardsHtml || '<div class="catalog-empty-state"><span>📚</span><h3>Your course library is empty</h3><p>Find a course to begin learning.</p></div>'}
       </div>
+      <button class="find-courses-inline" data-open-course-catalog><i data-lucide="search" style="width: 17px; height: 17px;"></i><span>Find More Courses</span></button>
     </div>
   `;
 }

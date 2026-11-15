@@ -5,7 +5,10 @@ import { renderReligionSymbol } from '../utils/symbolHelper.js';
 export function renderNavDrawer() {
   if (!appState.navDrawerOpen) return '';
 
-  const faithsListHtml = RELIGIONS_DATA.map(rel => {
+  const visibleCourses = appState.currentRole === 'student'
+    ? RELIGIONS_DATA.filter(rel => appState.ownsCourse(rel.id))
+    : RELIGIONS_DATA;
+  const faithsListHtml = visibleCourses.map(rel => {
     const { percent, completedCount, totalCount } = appState.getReligionProgress(rel.id);
     const symbolHtml = renderReligionSymbol(rel, 20);
 
@@ -56,18 +59,19 @@ export function renderNavDrawer() {
           </div>
         </div>
 
-        <div class="drawer-section-title">All Faith Courses & Realms</div>
+        <div class="drawer-section-title">${appState.currentRole === 'student' ? 'My Courses' : 'All Courses'}</div>
 
         <!-- Faiths List -->
         <div class="drawer-faiths-list">
-          ${faithsListHtml}
+          ${faithsListHtml || '<p class="drawer-empty-courses">No courses in your library yet.</p>'}
         </div>
 
         <!-- Drawer Footer -->
         <div class="drawer-footer">
+          ${appState.currentRole === 'student' ? `<button class="drawer-home-btn drawer-find-courses" id="btn-find-more-courses"><i data-lucide="search" style="width: 16px; height: 16px;"></i><span>Find More Courses</span></button>` : ''}
           <button class="drawer-home-btn" id="btn-drawer-home">
             <i data-lucide="home" style="width: 16px; height: 16px;"></i>
-            <span>All Wisdom Realms Home</span>
+            <span>${appState.currentRole === 'student' ? 'My Courses' : 'Seller Dashboard'}</span>
           </button>
 
           <button class="drawer-logout-btn" id="btn-drawer-logout">

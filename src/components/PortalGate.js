@@ -9,8 +9,8 @@ export function renderPortalGate() {
         </div>
 
         <div class="portal-selection-intro">
-          <h2>Select Your Learning Portal</h2>
-          <p>Choose your pathway to enter the dedicated learning environment designed for you.</p>
+          <h2>Choose a Portal</h2>
+          <p>Enter your course library or manage courses as a seller.</p>
         </div>
 
         <div class="portal-cards-grid">
@@ -34,22 +34,22 @@ export function renderPortalGate() {
             </button>
           </div>
 
-          <!-- Parent Portal Card -->
+          <!-- Course Seller Portal Card -->
           <div class="portal-card parent-card" id="btn-select-parent-portal">
-            <div class="portal-badge parent">Parent & Educator</div>
-            <div class="portal-icon-box">🛡️</div>
-            <h3>Parent Portal</h3>
+            <div class="portal-badge parent">Course Creator</div>
+            <div class="portal-icon-box">🛍️</div>
+            <h3>Course Seller Portal</h3>
             <p class="portal-desc">
-              Monitor your child's moral learning trajectory, access dinner table discussion questions, track screen time, and celebrate their character milestones.
+              Publish and manage courses, set demo prices, and review purchase activity and course performance.
             </p>
             <ul class="portal-features-list">
-              <li><span>📊</span> Real-Time Weekly Study Analytics</li>
-              <li><span>💬</span> Family Values & Dinner Prompts</li>
-              <li><span>🧭</span> Virtue Curriculum Guide</li>
-              <li><span>📜</span> Official Certificate Verification</li>
+              <li><span>📊</span> Course listing and sales dashboard</li>
+              <li><span>💰</span> Demo pricing and gross sales</li>
+              <li><span>📚</span> Manage published course content</li>
+              <li><span>🧾</span> Recent demo purchase activity</li>
             </ul>
             <button class="portal-enter-btn parent">
-              <span>Enter Parent Mode</span>
+              <span>Enter Seller Portal</span>
               <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
             </button>
           </div>
